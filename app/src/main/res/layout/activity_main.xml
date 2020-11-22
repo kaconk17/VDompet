@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgcolor"
+    android:orientation="vertical"
+    android:padding="@dimen/loginViewsMargin"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <TextView
+            android:id="@+id/txtdashboard"
+            android:text="VDompet"
+            android:textSize="30dp"
+            android:fontFamily="@font/indigo_daisy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_below="@+id/txtdashboard"
+            android:id="@+id/txtuser"
+            android:layout_marginTop="6dp"
+            android:text="User Name"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/txtemail"
+            android:layout_below="@+id/txtuser"
+            android:text="email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_pic"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/profile"
+            android:layout_width="62dp"
+            android:layout_height="62dp"/>
+
+    </RelativeLayout>
+    <androidx.cardview.widget.CardView
+        app:cardElevation="6dp"
+        app:cardCornerRadius="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dompetku"
+                android:textSize="@dimen/headerTextSize"
+                android:gravity="center"
+                />
+           <androidx.recyclerview.widget.RecyclerView
+               android:id="@+id/list_dompet"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent">
+
+           </androidx.recyclerview.widget.RecyclerView>
+
+
+        </LinearLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:src="@drawable/black_plus"
+            android:contentDescription="tambah"
+            android:scaleType="fitXY"
+            android:layout_margin="16dp" />
+    </androidx.cardview.widget.CardView>
+
+
+</LinearLayout>
