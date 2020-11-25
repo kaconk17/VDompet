@@ -47,6 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setPassword(pass);
 
                         dbHelper.createUser(user);
+                        dbHelper.closeDB();
 
                        builder.setMessage("Register Berhasil silahkan Login!")
                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {

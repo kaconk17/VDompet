@@ -16,7 +16,6 @@ public class LoginActivity extends AppCompatActivity {
     DBHelper dbHelper;
     EditText txt_email, txt_pass;
     Button btn_login;
-    //ProgressDialog pdialog;
     Alertdialog alert = new Alertdialog();
     SessionManager session;
 
@@ -37,11 +36,10 @@ public class LoginActivity extends AppCompatActivity {
                 String pass = txt_pass.getText().toString();
                 if (email.length() > 0 && pass.length()>0){
                     Users usr = new Users();
-                    //pdialog = new ProgressDialog(LoginActivity.this);
-                    //pdialog.setMessage("Login....");
-                    //pdialog.show();
+
                     usr = dbHelper.Authenticate(email,pass);
-                    //pdialog.hide();
+                    dbHelper.closeDB();
+
 
                     if (usr != null){
                         session.CreateLoginSession(usr.nama,usr.email,usr.id);

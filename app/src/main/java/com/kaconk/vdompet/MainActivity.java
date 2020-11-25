@@ -2,25 +2,33 @@ package com.kaconk.vdompet;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DompetAdapter.OnListListener {
     SessionManager session;
     TextView txtuser, txtemail;
     CircleImageView improfile;
@@ -28,7 +36,14 @@ public class MainActivity extends AppCompatActivity {
     View dialogview;
     EditText txt_dompet;
     String nama_dompet;
+    DBHelper dbHelper;
+    Users currUser;
 
+    private RecyclerView recyclerView;
+    private DompetAdapter adapter;
+    private List<Dompet> dompetlist;
+    private LinearLayoutManager linearLayoutManager;
+    private DividerItemDecoration dividerItemDecoration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +53,35 @@ public class MainActivity extends AppCompatActivity {
         txtuser = findViewById(R.id.txtuser);
         txtemail = findViewById(R.id.txtemail);
         improfile = findViewById(R.id.profile_pic);
+        recyclerView = findViewById(R.id.list_dompet);
+
+
+        dbHelper = new DBHelper(MainActivity.this);
         fab = findViewById(R.id.fab);
         if (!session.isLoggedIn()){
             Intent i = new Intent(getApplicationContext(), LoginActivity.class);
             i.addFlags(i.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
-        Users currenUser =  new Users();
-        currenUser = session.getUserDetails();
-        txtuser.setText(currenUser.nama);
-        txtemail.setText(currenUser.email);
+        currUser =  new Users();
+        currUser = session.getUserDetails();
+        txtuser.setText(currUser.nama);
+        txtemail.setText(currUser.email);
+        List<String> ls = new ArrayList<>();
+        ls = dbHelper.getalltable();
+        for (int i=0; i< ls.size(); i++){
+            Log.d("Table :",ls.get(i));
+        }
+        List<Dompet> dm = new ArrayList<>();
+        dm = dbHelper.getAllDompet(1);
+        for (Dompet dom : dm){
+            Log.d("Dompet :",dom.getNama_dompet()+", "+ dom.getId_dompet());
+        }
+        dompetlist = new ArrayList<>();
+        dompetlist = dbHelper.getAllDompet(currUser.id);
+        dbHelper.closeDB();
+        setuplist();
+        adapter.notifyDataSetChanged();
 
         improfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,8 +146,11 @@ public class MainActivity extends AppCompatActivity {
         dialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                Dompet dp = new Dompet();
                 nama_dompet = txt_dompet.getText().toString();
-
+                dp.setNama_dompet(nama_dompet);
+                dbHelper.createDompet(dp,currUser);
+                dbHelper.closeDB();
                 dialog.dismiss();
             }
         });
@@ -124,5 +161,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         dialog.show();
+    }
+
+    public void setuplist(){
+        adapter = new DompetAdapter(MainActivity.this, dompetlist, this);
+        linearLayoutManager = new LinearLayoutManager(MainActivity.this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        //dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), linearLayoutManager.getOrientation());
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        //recyclerView.addItemDecoration(dividerItemDecoration);
+        recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onListClick(int position) {
+        Dompet domp = new Dompet();
+        domp = dompetlist.get(position);
+        Toast.makeText(MainActivity.this,domp.getId_dompet(),Toast.LENGTH_LONG).show();
     }
 }
