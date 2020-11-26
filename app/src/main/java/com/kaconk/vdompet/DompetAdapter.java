@@ -57,6 +57,7 @@ public class DompetAdapter extends RecyclerView.Adapter<DompetAdapter.ViewHolder
             notifyItemChanged(prev);
             notifyItemChanged(selectedItem);
         }
+      
     }
     public interface OnListListener{
         void onListClick(int position);

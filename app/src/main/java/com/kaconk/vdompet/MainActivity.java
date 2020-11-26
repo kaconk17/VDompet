@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -37,13 +38,12 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
     EditText txt_dompet;
     String nama_dompet;
     DBHelper dbHelper;
-    Users currUser;
 
+    private Users currUser;
     private RecyclerView recyclerView;
     private DompetAdapter adapter;
     private List<Dompet> dompetlist;
     private LinearLayoutManager linearLayoutManager;
-    private DividerItemDecoration dividerItemDecoration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,20 +67,15 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
         currUser = session.getUserDetails();
         txtuser.setText(currUser.nama);
         txtemail.setText(currUser.email);
-        List<String> ls = new ArrayList<>();
-        ls = dbHelper.getalltable();
-        for (int i=0; i< ls.size(); i++){
-            Log.d("Table :",ls.get(i));
-        }
-        List<Dompet> dm = new ArrayList<>();
-        dm = dbHelper.getAllDompet(1);
-        for (Dompet dom : dm){
-            Log.d("Dompet :",dom.getNama_dompet()+", "+ dom.getId_dompet());
-        }
         dompetlist = new ArrayList<>();
         dompetlist = dbHelper.getAllDompet(currUser.id);
         dbHelper.closeDB();
-        setuplist();
+        adapter = new DompetAdapter(MainActivity.this, dompetlist, this);
+        linearLayoutManager = new LinearLayoutManager(MainActivity.this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        //recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
         improfile.setOnClickListener(new View.OnClickListener() {
@@ -149,8 +144,13 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
                 Dompet dp = new Dompet();
                 nama_dompet = txt_dompet.getText().toString();
                 dp.setNama_dompet(nama_dompet);
-                dbHelper.createDompet(dp,currUser);
+                dp.setSaldo(0);
+                String id = dbHelper.createDompet(dp,currUser);
                 dbHelper.closeDB();
+
+                dompetlist.add(dbHelper.getDompet(id));
+                dbHelper.closeDB();
+                adapter.notifyDataSetChanged();
                 dialog.dismiss();
             }
         });
@@ -162,22 +162,17 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
         });
         dialog.show();
     }
-
-    public void setuplist(){
-        adapter = new DompetAdapter(MainActivity.this, dompetlist, this);
-        linearLayoutManager = new LinearLayoutManager(MainActivity.this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        //dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), linearLayoutManager.getOrientation());
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        //recyclerView.addItemDecoration(dividerItemDecoration);
-        recyclerView.setAdapter(adapter);
-    }
-
     @Override
     public void onListClick(int position) {
         Dompet domp = new Dompet();
         domp = dompetlist.get(position);
-        Toast.makeText(MainActivity.this,domp.getId_dompet(),Toast.LENGTH_LONG).show();
+        Intent i = new Intent(this,TransActivity.class);
+        i.putExtra("id_domp", domp.getId_dompet());
+        startActivity(i);
+        //Toast.makeText(MainActivity.this,domp.getId_dompet(),Toast.LENGTH_LONG).show();
+    }
+
+    public static void removeDompet(String id_dompet){
+
     }
 }

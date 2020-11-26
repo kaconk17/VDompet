@@ -194,7 +194,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return dompet;
     }
     public Dompet getDompet(String id_dompet){
-        String selectQuery = "SELECT * FROM "+ TABLE_DOMPET+" WHERE id_dompet = "+ id_dompet;
+        String selectQuery = "SELECT * FROM "+ TABLE_DOMPET+" WHERE id_dompet = '"+ id_dompet+"'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
         if (c != null)
