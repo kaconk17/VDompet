@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,8 +45,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_DOMPET = "CREATE TABLE "+TABLE_DOMPET+" ("+KEY_ID_DOMPET+" TEXT PRIMARY KEY,"+KEY_ID_USER+" INTEGER,"+KEY_NAMA_DOMPET+" TEXT,"+KEY_SALDO+" NUMERIC,"+ KEY_CREATE+" DATETIME)";
 
-    private static final String CREATE_TABLE_IN = "CREATE TABLE "+ TABLE_IN+" (id_in TEXT PRIMARY KEY, id_dompet TEXT, tgl_in DATETIME, jumlah_in NUMBER)";
-    private static final String CREATE_TABLE_OUT = "CREATE TABLE "+ TABLE_OUT+" (id_out TEXT PRIMARY KEY, id_dompet TEXT, tgl_out DATETIME, jumlah_out NUMBER)";
+    private static final String CREATE_TABLE_IN = "CREATE TABLE "+ TABLE_IN+" (id_in TEXT PRIMARY KEY, id_dompet TEXT, tgl_in DATETIME, jumlah_in NUMBER, ket_in TEXT)";
+    private static final String CREATE_TABLE_OUT = "CREATE TABLE "+ TABLE_OUT+" (id_out TEXT PRIMARY KEY, id_dompet TEXT, tgl_out DATETIME, jumlah_out NUMBER, ket_out TEXT)";
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 1);
     }
@@ -222,10 +223,100 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean deleteDompet(String id_dompet){
         SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IN,  "id_dompet = ?",
+                new String[] { id_dompet });
+        db.delete(TABLE_OUT,  "id_dompet = ?",
+                new String[] { id_dompet });
         db.delete(TABLE_DOMPET,  "id_dompet = ?",
                 new String[] { id_dompet });
         return true;
     }
+
+    public String createIn(InTrans in, String id_dompet){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String id = UUID.randomUUID().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date date = new Date();
+        try{
+           date = sdf.parse(in.getTgl_in());
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+        values.put("id_in",id);
+        values.put("id_dompet",id_dompet);
+        values.put("tgl_in", in.getTgl_in());
+        values.put("jumlah_in",in.getJumlah());
+        values.put("ket_in", in.getKet_in());
+
+        db.insert(TABLE_IN, null , values);
+
+        return id;
+    }
+
+    public List<InTrans> getInTrans(String tgl1, String tgl2, Dompet domp){
+        List<InTrans> inAll = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date date1 = new Date();
+        Date date2 = new Date();
+        try{
+            date1 = sdf.parse(tgl1);
+            date2 = sdf.parse(tgl2);
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+        //String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in >= "+tgl1+" AND tgl_in <= "+tgl2;
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c.moveToFirst()){
+            do {
+                InTrans in = new InTrans();
+                in.setId_in(c.getString(c.getColumnIndex("id_in")));
+                in.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+                in.setTgl_in(c.getString(c.getColumnIndex("tgl_in")));
+                in.setJumlah(c.getDouble(c.getColumnIndex("jumlah_in")));
+                in.setKet_in(c.getString(c.getColumnIndex("ket_in")));
+                inAll.add(in);
+            }while (c.moveToNext());
+        }
+        return inAll;
+    }
+
+    public InTrans getIn(String id_in){
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_in = '"+ id_in+"'";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c != null)
+            c.moveToFirst();
+        InTrans in = new InTrans();
+        in.setId_in(c.getString(c.getColumnIndex("id_in")));
+        in.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+        in.setTgl_in(c.getString(c.getColumnIndex("tgl_in")));
+        in.setJumlah(c.getDouble(c.getColumnIndex("jumlah_in")));
+        in.setKet_in(c.getString(c.getColumnIndex("ket_in")));
+        return in;
+    }
+
+    public boolean updateIn(InTrans in){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("tgl_in", in.getTgl_in());
+        values.put("jumlah_in",in.getJumlah());
+        values.put("ket_in",in.getKet_in());
+
+        db.update(TABLE_IN, values,"id_in = ?", new String[]{in.getId_in()});
+        return true;
+    }
+    public boolean deleteIn(String id_in){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IN,  "id_in = ?",
+                new String[] { id_in });
+        return true;
+    }
+
 
     public void closeDB() {
         SQLiteDatabase db = this.getReadableDatabase();

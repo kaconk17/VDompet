@@ -41,6 +41,11 @@ public class AdapterIn  extends RecyclerView.Adapter<AdapterIn.InHolder>{
         holder.ket_in.setText(inTrans.getKet_in());
     }
 
+    public void setListContent(List<InTrans> list_in){
+        this.datalist = list_in;
+        notifyItemRangeChanged(0,datalist.size());
+    }
+
     @Override
     public int getItemCount() {
         return (datalist != null) ? datalist.size() : 0;
@@ -59,5 +64,10 @@ public class AdapterIn  extends RecyclerView.Adapter<AdapterIn.InHolder>{
         public void onClick(View v) {
 
         }
+    }
+    public void removeAt(int position){
+        datalist.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(0, datalist.size());
     }
 }

@@ -4,11 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:orientation="vertical"
     android:background="@color/bgcolor">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
         <EditText
@@ -17,8 +20,10 @@
             android:layout_height="wrap_content"
             android:inputType="date"
             android:focusable="false"
+
             android:cursorVisible="false"
-            android:layout_weight=".20"/>
+            android:layout_weight=".20"
+            android:gravity="center_horizontal" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -27,6 +32,7 @@
             android:id="@+id/in_date2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+          android:gravity="center_horizontal"
             android:inputType="date"
             android:focusable="false"
             android:cursorVisible="false"
@@ -63,7 +69,15 @@
                android:layout_height="match_parent">
 
            </androidx.recyclerview.widget.RecyclerView>
-
+           <com.google.android.material.floatingactionbutton.FloatingActionButton
+               android:id="@+id/fab_in"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="end|bottom"
+               android:src="@drawable/black_plus"
+               android:contentDescription="tambah"
+               android:scaleType="fitXY"
+               android:layout_margin="16dp" />
        </androidx.cardview.widget.CardView>
 
 
