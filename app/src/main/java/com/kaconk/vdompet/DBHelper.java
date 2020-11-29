@@ -381,6 +381,24 @@ public class DBHelper extends SQLiteOpenHelper {
                 new String[] { id_out });
         return true;
     }
+    public List<History> getHistory(String tgl1, String tgl2, Dompet dompet){
+        List<History> hystAll = new ArrayList<>();
+        String selectQuery = "SELECT id_dompet, tgl_in as tgl, ket_in as ket, jumlah_in as jumlah, 'IN' as jenis FROM "+ TABLE_IN+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59'  UNION ALL SELECT id_dompet, tgl_out as tgl, ket_out as ket, jumlah_out as jumlah, 'OUT' as jenis FROM "+TABLE_OUT+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl ASC";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c.moveToFirst()){
+            do {
+                History history = new History();
+                history.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+                history.setTgl(c.getString(c.getColumnIndex("tgl")));
+                history.setKet(c.getString(c.getColumnIndex("ket")));
+                history.setJumlah(c.getDouble(c.getColumnIndex("jumlah")));
+                history.setJenis(c.getString(c.getColumnIndex("jenis")));
+                hystAll.add(history);
+            }while (c.moveToNext());
+        }
+        return hystAll;
+    }
 
     public void closeDB() {
         SQLiteDatabase db = this.getReadableDatabase();

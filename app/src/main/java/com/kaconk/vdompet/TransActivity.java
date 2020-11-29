@@ -71,7 +71,7 @@ public class TransActivity extends AppCompatActivity implements EventListener {
     public void getDompetdata(String id){
         curdomp = dbHelper.getDompet(id);
         dbHelper.closeDB();
-        SaldoDompet.setText("Rp "+NumberFormat.getInstance().format(curdomp.getSaldo()));
+        SaldoDompet.setText("Saldo : Rp "+NumberFormat.getInstance().format(curdomp.getSaldo()));
         NamaDompet.setText(curdomp.getNama_dompet());
     }
 
