@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,8 +45,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_DOMPET = "CREATE TABLE "+TABLE_DOMPET+" ("+KEY_ID_DOMPET+" TEXT PRIMARY KEY,"+KEY_ID_USER+" INTEGER,"+KEY_NAMA_DOMPET+" TEXT,"+KEY_SALDO+" NUMERIC,"+ KEY_CREATE+" DATETIME)";
 
-    private static final String CREATE_TABLE_IN = "CREATE TABLE "+ TABLE_IN+" (id_in TEXT PRIMARY KEY, id_dompet TEXT, tgl_in DATETIME, jumlah_in NUMBER)";
-    private static final String CREATE_TABLE_OUT = "CREATE TABLE "+ TABLE_OUT+" (id_out TEXT PRIMARY KEY, id_dompet TEXT, tgl_out DATETIME, jumlah_out NUMBER)";
+    private static final String CREATE_TABLE_IN = "CREATE TABLE "+ TABLE_IN+" (id_in TEXT PRIMARY KEY, id_dompet TEXT, tgl_in DATETIME, jumlah_in NUMBER, ket_in TEXT)";
+    private static final String CREATE_TABLE_OUT = "CREATE TABLE "+ TABLE_OUT+" (id_out TEXT PRIMARY KEY, id_dompet TEXT, tgl_out DATETIME, jumlah_out NUMBER, ket_out TEXT)";
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 1);
     }
@@ -222,8 +223,162 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean deleteDompet(String id_dompet){
         SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IN,  "id_dompet = ?",
+                new String[] { id_dompet });
+        db.delete(TABLE_OUT,  "id_dompet = ?",
+                new String[] { id_dompet });
         db.delete(TABLE_DOMPET,  "id_dompet = ?",
                 new String[] { id_dompet });
+        return true;
+    }
+
+    public String createIn(InTrans in, String id_dompet){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String id = UUID.randomUUID().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+        try{
+           date = sdf.parse(in.getTgl_in());
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+        values.put("id_in",id);
+        values.put("id_dompet",id_dompet);
+        values.put("tgl_in", sdf.format(date));
+        values.put("jumlah_in",in.getJumlah());
+        values.put("ket_in", in.getKet_in());
+
+        db.insert(TABLE_IN, null , values);
+
+        return id;
+    }
+
+    public List<InTrans> getInTrans(String tgl1, String tgl2, Dompet domp){
+        List<InTrans> inAll = new ArrayList<>();
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_in DESC";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c.moveToFirst()){
+            do {
+                InTrans in = new InTrans();
+                in.setId_in(c.getString(c.getColumnIndex("id_in")));
+                in.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+                in.setTgl_in(c.getString(c.getColumnIndex("tgl_in")));
+                in.setJumlah(c.getDouble(c.getColumnIndex("jumlah_in")));
+                in.setKet_in(c.getString(c.getColumnIndex("ket_in")));
+                inAll.add(in);
+            }while (c.moveToNext());
+        }
+        return inAll;
+    }
+
+    public InTrans getIn(String id_in){
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_in = '"+ id_in+"'";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c != null)
+            c.moveToFirst();
+        InTrans in = new InTrans();
+        in.setId_in(c.getString(c.getColumnIndex("id_in")));
+        in.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+        in.setTgl_in(c.getString(c.getColumnIndex("tgl_in")));
+        in.setJumlah(c.getDouble(c.getColumnIndex("jumlah_in")));
+        in.setKet_in(c.getString(c.getColumnIndex("ket_in")));
+        return in;
+    }
+
+    public boolean updateIn(InTrans in){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("tgl_in", in.getTgl_in());
+        values.put("jumlah_in",in.getJumlah());
+        values.put("ket_in",in.getKet_in());
+
+        db.update(TABLE_IN, values,"id_in = ?", new String[]{in.getId_in()});
+        return true;
+    }
+    public boolean deleteIn(String id_in){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_IN,  "id_in = ?",
+                new String[] { id_in });
+        return true;
+    }
+
+    public String createOut(OutTrans out, String id_dompet){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String id = UUID.randomUUID().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+        try{
+            date = sdf.parse(out.getTgl_out());
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+        values.put("id_out",id);
+        values.put("id_dompet",id_dompet);
+        values.put("tgl_out", sdf.format(date));
+        values.put("jumlah_out",out.getJumlah());
+        values.put("ket_out", out.getKet_out());
+
+        db.insert(TABLE_OUT, null , values);
+
+        return id;
+    }
+    public List<OutTrans> getOutTrans(String tgl1, String tgl2, Dompet dompet){
+        List<OutTrans> outAll = new ArrayList<>();
+        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_dompet = '"+ dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_out DESC";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c.moveToFirst()){
+            do {
+                OutTrans out = new OutTrans();
+                out.setId_out(c.getString(c.getColumnIndex("id_out")));
+                out.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+                out.setTgl_out(c.getString(c.getColumnIndex("tgl_out")));
+                out.setJumlah(c.getDouble(c.getColumnIndex("jumlah_out")));
+                out.setKet_out(c.getString(c.getColumnIndex("ket_out")));
+                outAll.add(out);
+            }while (c.moveToNext());
+        }
+        return outAll;
+    }
+
+    public OutTrans getOut(String id_out){
+        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_out = '"+ id_out+"'";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c != null)
+            c.moveToFirst();
+       OutTrans out = new OutTrans();
+        out.setId_out(c.getString(c.getColumnIndex("id_out")));
+        out.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+        out.setTgl_out(c.getString(c.getColumnIndex("tgl_out")));
+        out.setJumlah(c.getDouble(c.getColumnIndex("jumlah_out")));
+        out.setKet_out(c.getString(c.getColumnIndex("ket_out")));
+        return out;
+    }
+
+    public boolean updateOut(OutTrans out){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("tgl_out", out.getTgl_out());
+        values.put("jumlah_out",out.getJumlah());
+        values.put("ket_out",out.getKet_out());
+
+        db.update(TABLE_OUT, values,"id_out = ?", new String[]{out.getId_out()});
+        return true;
+    }
+
+    public boolean deleteOut(String id_out){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_OUT,  "id_out = ?",
+                new String[] { id_out });
         return true;
     }
 
