@@ -236,7 +236,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         String id = UUID.randomUUID().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = new Date();
         try{
            date = sdf.parse(in.getTgl_in());
@@ -245,7 +245,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         values.put("id_in",id);
         values.put("id_dompet",id_dompet);
-        values.put("tgl_in", in.getTgl_in());
+        values.put("tgl_in", sdf.format(date));
         values.put("jumlah_in",in.getJumlah());
         values.put("ket_in", in.getKet_in());
 
@@ -256,7 +256,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public List<InTrans> getInTrans(String tgl1, String tgl2, Dompet domp){
         List<InTrans> inAll = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date1 = new Date();
         Date date2 = new Date();
         try{
@@ -266,7 +266,7 @@ public class DBHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         //String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in >= "+tgl1+" AND tgl_in <= "+tgl2;
-        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"'";
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_in DESC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
         if (c.moveToFirst()){

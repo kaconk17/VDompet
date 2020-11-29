@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,9 @@ public class AdapterDompet extends RecyclerView.Adapter<AdapterDompet.MyViewHold
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Dompet listDompet = datalist.get(position);
-        String saldo =String.valueOf(listDompet.getSaldo());
+
         holder.tnama.setText(listDompet.getNama_dompet());
-        holder.tsaldo.setText("Rp "+saldo);
+        holder.tsaldo.setText("Rp "+ NumberFormat.getInstance().format(listDompet.getSaldo()));
     }
 
     public void setListContent(List<Dompet> list_dompet){

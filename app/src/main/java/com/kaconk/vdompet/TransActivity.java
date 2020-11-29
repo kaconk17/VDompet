@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
 
+import java.text.NumberFormat;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class TransActivity extends AppCompatActivity implements EventListener {
@@ -41,6 +43,7 @@ public class TransActivity extends AppCompatActivity implements EventListener {
         String id_domp = (String) getIntent().getSerializableExtra("id_domp");
         NamaDompet = findViewById(R.id.namedompet);
         SaldoDompet = findViewById(R.id.statSaldo);
+
         Bundle dt = new Bundle();
         dt.putString("id_dompet",id_domp);
         Fragment fone = new TabInFrag();
@@ -68,7 +71,7 @@ public class TransActivity extends AppCompatActivity implements EventListener {
     public void getDompetdata(String id){
         curdomp = dbHelper.getDompet(id);
         dbHelper.closeDB();
-        SaldoDompet.setText("Rp "+String.valueOf(curdomp.getSaldo()));
+        SaldoDompet.setText("Rp "+NumberFormat.getInstance().format(curdomp.getSaldo()));
         NamaDompet.setText(curdomp.getNama_dompet());
     }
 

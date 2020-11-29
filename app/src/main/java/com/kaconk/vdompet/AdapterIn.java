@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,9 @@ public class AdapterIn  extends RecyclerView.Adapter<AdapterIn.InHolder>{
     @Override
     public void onBindViewHolder(@NonNull InHolder holder, int position) {
         InTrans inTrans = datalist.get(position);
-        String juml =String.valueOf(inTrans.getJumlah());
+
         holder.tgl_in.setText(inTrans.getTgl_in());
-        holder.juml_in.setText("Rp "+juml);
+        holder.juml_in.setText("Rp "+ NumberFormat.getInstance().format(inTrans.getJumlah()));
         holder.ket_in.setText(inTrans.getKet_in());
     }
 
