@@ -5,12 +5,9 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
@@ -29,9 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -127,6 +122,7 @@ public class TabInFrag extends Fragment {
                                     public void onClick(DialogInterface dialog, int which) {
                                         switch (which){
                                             case DialogInterface.BUTTON_POSITIVE:
+                                                updatetotal();
                                                 double jm = inList.get(position).getJumlah();
                                                 double awal = curdompet.getSaldo();
 
@@ -263,9 +259,10 @@ public class TabInFrag extends Fragment {
     private void updatetotal(){
         double t_in = 0;
         for (int i =0; i < inList.size(); i++){
-            Log.d("IN :", inList.get(i).id_in+", "+inList.get(i).getTgl_in());
             t_in = t_in + inList.get(i).getJumlah();
         }
+        curdompet = dbHelper.getDompet(id_dompet);
+        dbHelper.closeDB();
         txttotal.setText("Total : Rp "+ NumberFormat.getInstance().format(t_in));
         listener.getDompetdata(curdompet.getId_dompet());
     }
@@ -324,6 +321,7 @@ public class TabInFrag extends Fragment {
                     InTrans in = new InTrans();
                     double tambah = 0;
                     try{
+                        updatetotal();
                         tambah = Double.parseDouble(juml);
                         in.setTgl_in(txttgl_in.getText().toString());
                         in.setJumlah(tambah);
@@ -409,6 +407,7 @@ public class TabInFrag extends Fragment {
                 if (!juml.isEmpty()){
                     double tambah = 0;
                     try{
+                        updatetotal();
                         tambah = Double.parseDouble(juml);
                         double awal = curIn.getJumlah();
                         double saldo = curdompet.getSaldo();

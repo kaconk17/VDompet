@@ -256,16 +256,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public List<InTrans> getInTrans(String tgl1, String tgl2, Dompet domp){
         List<InTrans> inAll = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date date1 = new Date();
-        Date date2 = new Date();
-        try{
-            date1 = sdf.parse(tgl1);
-            date2 = sdf.parse(tgl2);
-        }catch (ParseException e){
-            e.printStackTrace();
-        }
-        //String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in >= "+tgl1+" AND tgl_in <= "+tgl2;
         String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_in DESC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
@@ -317,6 +307,80 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    public String createOut(OutTrans out, String id_dompet){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        String id = UUID.randomUUID().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+        try{
+            date = sdf.parse(out.getTgl_out());
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+        values.put("id_out",id);
+        values.put("id_dompet",id_dompet);
+        values.put("tgl_out", sdf.format(date));
+        values.put("jumlah_out",out.getJumlah());
+        values.put("ket_out", out.getKet_out());
+
+        db.insert(TABLE_OUT, null , values);
+
+        return id;
+    }
+    public List<OutTrans> getOutTrans(String tgl1, String tgl2, Dompet dompet){
+        List<OutTrans> outAll = new ArrayList<>();
+        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_dompet = '"+ dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_out DESC";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c.moveToFirst()){
+            do {
+                OutTrans out = new OutTrans();
+                out.setId_out(c.getString(c.getColumnIndex("id_out")));
+                out.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+                out.setTgl_out(c.getString(c.getColumnIndex("tgl_out")));
+                out.setJumlah(c.getDouble(c.getColumnIndex("jumlah_out")));
+                out.setKet_out(c.getString(c.getColumnIndex("ket_out")));
+                outAll.add(out);
+            }while (c.moveToNext());
+        }
+        return outAll;
+    }
+
+    public OutTrans getOut(String id_out){
+        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_out = '"+ id_out+"'";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery,null);
+        if (c != null)
+            c.moveToFirst();
+       OutTrans out = new OutTrans();
+        out.setId_out(c.getString(c.getColumnIndex("id_out")));
+        out.setId_dompet(c.getString(c.getColumnIndex("id_dompet")));
+        out.setTgl_out(c.getString(c.getColumnIndex("tgl_out")));
+        out.setJumlah(c.getDouble(c.getColumnIndex("jumlah_out")));
+        out.setKet_out(c.getString(c.getColumnIndex("ket_out")));
+        return out;
+    }
+
+    public boolean updateOut(OutTrans out){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("tgl_out", out.getTgl_out());
+        values.put("jumlah_out",out.getJumlah());
+        values.put("ket_out",out.getKet_out());
+
+        db.update(TABLE_OUT, values,"id_out = ?", new String[]{out.getId_out()});
+        return true;
+    }
+
+    public boolean deleteOut(String id_out){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_OUT,  "id_out = ?",
+                new String[] { id_out });
+        return true;
+    }
 
     public void closeDB() {
         SQLiteDatabase db = this.getReadableDatabase();
