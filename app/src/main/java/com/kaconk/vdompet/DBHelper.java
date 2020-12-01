@@ -256,7 +256,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public List<InTrans> getInTrans(String tgl1, String tgl2, Dompet domp){
         List<InTrans> inAll = new ArrayList<>();
-        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_in DESC";
+        String selectQuery = "SELECT * FROM "+ TABLE_IN+" WHERE id_dompet = '"+ domp.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+"' AND '"+tgl2+"' ORDER BY tgl_in DESC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
         if (c.moveToFirst()){
@@ -330,7 +330,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public List<OutTrans> getOutTrans(String tgl1, String tgl2, Dompet dompet){
         List<OutTrans> outAll = new ArrayList<>();
-        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_dompet = '"+ dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl_out DESC";
+        String selectQuery = "SELECT * FROM "+ TABLE_OUT+" WHERE id_dompet = '"+ dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+"' AND '"+tgl2+"' ORDER BY tgl_out DESC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
         if (c.moveToFirst()){
@@ -383,7 +383,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     public List<History> getHistory(String tgl1, String tgl2, Dompet dompet){
         List<History> hystAll = new ArrayList<>();
-        String selectQuery = "SELECT id_dompet, tgl_in as tgl, ket_in as ket, jumlah_in as jumlah, 'IN' as jenis FROM "+ TABLE_IN+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59'  UNION ALL SELECT id_dompet, tgl_out as tgl, ket_out as ket, jumlah_out as jumlah, 'OUT' as jenis FROM "+TABLE_OUT+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+" 00:00:00'"+" AND '"+tgl2+" 23:59:59' ORDER BY tgl ASC";
+        String selectQuery = "SELECT id_dompet, tgl_in as tgl, ket_in as ket, jumlah_in as jumlah, 'IN' as jenis FROM "+ TABLE_IN+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_in BETWEEN '"+tgl1+"' AND '"+tgl2+"'  UNION ALL SELECT id_dompet, tgl_out as tgl, ket_out as ket, jumlah_out as jumlah, 'OUT' as jenis FROM "+TABLE_OUT+" WHERE id_dompet = '"+dompet.getId_dompet()+"' AND tgl_out BETWEEN '"+tgl1+"' AND '"+tgl2+"' ORDER BY tgl ASC";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery,null);
         if (c.moveToFirst()){
