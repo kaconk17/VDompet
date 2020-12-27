@@ -42,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
                     if (usr != null){
-                        session.CreateLoginSession(usr.nama,usr.email,usr.id);
+                        //session.CreateLoginSession(usr.nama,usr.email,usr.id,"token");
                         Intent i = new Intent(LoginActivity.this,MainActivity.class);
                         startActivity(i);
                         finish();

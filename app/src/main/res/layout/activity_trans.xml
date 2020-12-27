@@ -29,13 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/set_dompet"
-                android:layout_alignParentRight="true"
-                android:src="@drawable/gear"
-                android:layout_centerVertical="true"
-                android:layout_width="30dp"
-                android:layout_height="30dp"/>
+
 
         </RelativeLayout>
 

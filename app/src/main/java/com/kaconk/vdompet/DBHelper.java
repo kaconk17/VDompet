@@ -104,7 +104,7 @@ public class DBHelper extends SQLiteOpenHelper {
         if (c != null){
             c.moveToFirst();
             Users user1 = new Users();
-            user1.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+            user1.setId(c.getString(c.getColumnIndex(KEY_ID)));
             user1.setNama(c.getString(c.getColumnIndex(KEY_NAMA)));
             user1.setEmail(c.getString(c.getColumnIndex(KEY_EMAIL)));
             user1.setPassword(c.getString(c.getColumnIndex(KEY_PASSWORD)));
@@ -136,7 +136,7 @@ public class DBHelper extends SQLiteOpenHelper {
         if (c.moveToFirst()){
             do {
                 Users us = new Users();
-                us.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+                us.setId(c.getString((c.getColumnIndex(KEY_ID))));
                 us.setNama(c.getString(c.getColumnIndex(KEY_NAMA)));
                 us.setEmail(c.getString(c.getColumnIndex(KEY_EMAIL)));
                 us.setPassword(c.getString(c.getColumnIndex(KEY_PASSWORD)));
@@ -174,7 +174,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return id;
     }
 
-    public List<Dompet> getAllDompet(int id_user){
+    public List<Dompet> getAllDompet(String id_user){
         List<Dompet> dompet = new ArrayList<>();
         String selectQuery = "SELECT * FROM "+ TABLE_DOMPET+" WHERE id_user = "+ id_user;
 

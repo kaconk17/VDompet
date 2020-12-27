@@ -36,7 +36,7 @@ public class TransActivity extends AppCompatActivity {
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
-        seting = findViewById(R.id.set_dompet);
+        //seting = findViewById(R.id.);
         NamaDompet = findViewById(R.id.namedompet);
         SaldoDompet = findViewById(R.id.statSaldo);
         adapter = new TabAdapter(getSupportFragmentManager());
@@ -52,7 +52,7 @@ public class TransActivity extends AppCompatActivity {
         NamaDompet.setText(curdomp.getNama_dompet());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
-
+/*
         seting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,7 +95,7 @@ public class TransActivity extends AppCompatActivity {
                 popup.show();
             }
         });
-
+*/
     }
     private void dialogForm(){
         AlertDialog.Builder dialog = new AlertDialog.Builder(TransActivity.this);

@@ -17,7 +17,7 @@ public class SessionManager {
     private static final String IS_LOGIN = "IsLoggedin";
     public static final String KEY_NAME = "nama";
     public static final String KEY_EMAIL = "email";
-
+    public static final String KEY_TOKEN = "token";
     public static final String KEY_ID = "id";
 
     public SessionManager(Context context){
@@ -26,7 +26,7 @@ public class SessionManager {
         editor = pref.edit();
     }
 
-    public void CreateLoginSession(String nama, String email, int id){
+    public void CreateLoginSession(String nama, String email, int id, String token){
         editor.putBoolean(IS_LOGIN, true);
 
         // Storing name in pref
@@ -34,7 +34,7 @@ public class SessionManager {
 
         // Storing email in pref
         editor.putString(KEY_EMAIL, email);
-
+        editor.putString(KEY_TOKEN, token);
 
         editor.putInt(KEY_ID, id);
         editor.commit();
@@ -48,7 +48,9 @@ public class SessionManager {
         // user email id
         usr.setEmail(pref.getString(KEY_EMAIL, null));
 
-        usr.setId(pref.getInt(KEY_ID,0));
+        usr.setEmail(pref.getString(KEY_TOKEN, null));
+
+        usr.setId(pref.getString(KEY_ID,null));
         return usr;
     }
     public boolean isLoggedIn(){
