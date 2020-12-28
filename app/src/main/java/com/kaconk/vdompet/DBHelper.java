@@ -184,7 +184,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 Dompet dp = new Dompet();
                 dp.setId_dompet(c.getString((c.getColumnIndex("id_dompet"))));
-                dp.setId_user(c.getInt(c.getColumnIndex("id_user")));
+                dp.setId_user(c.getString(c.getColumnIndex("id_user")));
                 dp.setNama_dompet(c.getString(c.getColumnIndex("nama_dompet")));
                 dp.setSaldo(c.getDouble(c.getColumnIndex("saldo")));
                 dp.setCreated_at(c.getString(c.getColumnIndex("create_at")));
@@ -202,7 +202,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         Dompet dp = new Dompet();
         dp.setId_dompet(c.getString((c.getColumnIndex("id_dompet"))));
-        dp.setId_user(c.getInt(c.getColumnIndex("id_user")));
+        dp.setId_user(c.getString(c.getColumnIndex("id_user")));
         dp.setNama_dompet(c.getString(c.getColumnIndex("nama_dompet")));
         dp.setSaldo(c.getDouble(c.getColumnIndex("saldo")));
         dp.setCreated_at(c.getString(c.getColumnIndex("create_at")));

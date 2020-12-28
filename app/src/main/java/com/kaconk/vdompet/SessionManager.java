@@ -26,7 +26,7 @@ public class SessionManager {
         editor = pref.edit();
     }
 
-    public void CreateLoginSession(String nama, String email, int id, String token){
+    public void CreateLoginSession(String nama, String email, String id, String token){
         editor.putBoolean(IS_LOGIN, true);
 
         // Storing name in pref
@@ -36,7 +36,7 @@ public class SessionManager {
         editor.putString(KEY_EMAIL, email);
         editor.putString(KEY_TOKEN, token);
 
-        editor.putInt(KEY_ID, id);
+        editor.putString(KEY_ID, id);
         editor.commit();
     }
 
@@ -48,7 +48,7 @@ public class SessionManager {
         // user email id
         usr.setEmail(pref.getString(KEY_EMAIL, null));
 
-        usr.setEmail(pref.getString(KEY_TOKEN, null));
+        usr.setToken(pref.getString(KEY_TOKEN, null));
 
         usr.setId(pref.getString(KEY_ID,null));
         return usr;

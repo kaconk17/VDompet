@@ -22,12 +22,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.kaconk.vdompet.Model.GetDompet;
+import com.kaconk.vdompet.Rest.ApiClient;
+import com.kaconk.vdompet.Rest.ApiInterface;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements DompetAdapter.OnListListener {
     SessionManager session;
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
     private DompetAdapter adapter;
     private List<Dompet> dompetlist;
     private LinearLayoutManager linearLayoutManager;
+    private ApiInterface mApiinterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
         txtemail = findViewById(R.id.txtemail);
         improfile = findViewById(R.id.profile_pic);
         recyclerView = findViewById(R.id.list_dompet);
-
+        mApiinterface = ApiClient.getClient().create(ApiInterface.class);
 
         dbHelper = new DBHelper(MainActivity.this);
         fab = findViewById(R.id.fab);
@@ -68,12 +77,41 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
         txtuser.setText(currUser.nama);
         txtemail.setText(currUser.email);
         dompetlist = new ArrayList<>();
-        dompetlist = dbHelper.getAllDompet(currUser.id);
-        dbHelper.closeDB();
+        Call<GetDompet> getallDompet = mApiinterface.getalldompet(currUser.token);
+        getallDompet.enqueue(new Callback<GetDompet>() {
+            @Override
+            public void onResponse(Call<GetDompet> call, Response<GetDompet> response) {
+                if (response.isSuccessful()){
+                    dompetlist = response.body().getListDompet();
+                }else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(jObjError.getString("error"))
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                        builder.create();
+                        builder.show();
+
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetDompet> call, Throwable t) {
+
+            }
+        });
         adapter = new DompetAdapter(MainActivity.this, dompetlist, this);
         linearLayoutManager = new LinearLayoutManager(MainActivity.this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        //recyclerView.setHasFixedSize(true);
+
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -140,18 +178,47 @@ public class MainActivity extends AppCompatActivity implements DompetAdapter.OnL
 
         dialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(final DialogInterface dialog, int which) {
                 Dompet dp = new Dompet();
                 nama_dompet = txt_dompet.getText().toString();
                 dp.setNama_dompet(nama_dompet);
                 dp.setSaldo(0);
-                String id = dbHelper.createDompet(dp,currUser);
-                dbHelper.closeDB();
 
-                dompetlist.add(dbHelper.getDompet(id));
-                dbHelper.closeDB();
-                adapter.notifyDataSetChanged();
-                dialog.dismiss();
+                Call<Dompet> insertDompet = mApiinterface.createDompet(currUser.token,dp);
+                insertDompet.enqueue(new Callback<Dompet>() {
+                    @Override
+                    public void onResponse(Call<Dompet> call, Response<Dompet> response) {
+                        if (response.isSuccessful()){
+                            Dompet newDompet = new Dompet();
+                            newDompet = response.body();
+                            dompetlist.add(newDompet);
+                            adapter.notifyDataSetChanged();
+                            dialog.dismiss();
+                        }else {
+                            try {
+                                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                                builder.setMessage(jObjError.getString("error"))
+                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                            }
+                                        });
+                                builder.create();
+                                builder.show();
+                            } catch (Exception e) {
+                                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Dompet> call, Throwable t) {
+
+                    }
+                });
+
             }
         });
         dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

@@ -1,17 +1,24 @@
 package com.kaconk.vdompet;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Dompet {
+    @SerializedName("id_dompet")
     String id_dompet;
-    int id_user;
+    @SerializedName("id_user")
+    String id_user;
+    @SerializedName("nama_dompet")
     String nama_dompet;
+    @SerializedName("saldo")
     double saldo;
+    @SerializedName("created_at")
     String created_at;
 
     public Dompet(){
 
     }
 
-    public Dompet(String id_dompet, int id_user, String nama, double saldo){
+    public Dompet(String id_dompet, String id_user, String nama, double saldo){
         this.id_dompet = id_dompet;
         this.id_user = id_user;
         this.nama_dompet = nama;
@@ -20,7 +27,7 @@ public class Dompet {
     public void setId_dompet(String id){
         this.id_dompet = id;
     }
-    public void setId_user(int id_user){
+    public void setId_user(String id_user){
         this.id_user = id_user;
     }
     public void setNama_dompet(String nama){
@@ -36,7 +43,7 @@ public class Dompet {
     public String getId_dompet(){
         return this.id_dompet;
     }
-    public int getId_user(){
+    public String getId_user(){
         return this.id_user;
     }
     public String getNama_dompet(){

@@ -25,11 +25,6 @@ import com.kaconk.vdompet.Rest.ApiInterface;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,7 +32,7 @@ import retrofit2.Response;
 public class RegisterActivity extends AppCompatActivity {
     Button btn_reg;
     EditText txt_nama, txt_email, txt_pass;
-    DBHelper dbHelper;
+
     private String BASE_URL = "https://vdompet.herokuapp.com/api/auth/signup/";
     private ProgressDialog pDialog;
     private static final String TAG = RegisterActivity.class.getSimpleName();
@@ -48,7 +43,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        dbHelper = new DBHelper(getApplicationContext());
+
         btn_reg = findViewById(R.id.btn_register);
         txt_nama = findViewById(R.id.txt_nama);
         txt_email = findViewById(R.id.txt_email);
@@ -146,7 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (pass.isEmpty()){
             valid = false;
         }else {
-            if (pass.length()>4){
+            if (pass.length()>5){
                 valid = true;
             }else {
                 valid = false;
