@@ -1,10 +1,17 @@
 package com.kaconk.vdompet;
 
+import com.google.gson.annotations.SerializedName;
+
 public class InTrans {
+    @SerializedName("id_in")
     String id_in;
+    @SerializedName("id_dompet")
     String id_dompet;
+    @SerializedName("tgl_in")
     String tgl_in;
+    @SerializedName("ket_in")
     String ket_in;
+    @SerializedName("jumlah")
     double jumlah;
 
     public InTrans(){

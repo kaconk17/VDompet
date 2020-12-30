@@ -25,6 +25,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.kaconk.vdompet.Model.GetIn;
+import com.kaconk.vdompet.Model.NewDompet;
+import com.kaconk.vdompet.Model.NewIn;
+import com.kaconk.vdompet.Rest.ApiClient;
+import com.kaconk.vdompet.Rest.ApiInterface;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -33,6 +38,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TabInFrag extends Fragment {
     private Context context;
@@ -53,6 +62,9 @@ public class TabInFrag extends Fragment {
     private EventListener listener;
     private ImageButton cari_in;
     private DividerItemDecoration divider;
+    private ApiInterface mApiinterface;
+    private Users currUser;
+    private SessionManager session;
     Alertdialog alert = new Alertdialog();
 
     @Override
@@ -75,14 +87,31 @@ public class TabInFrag extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         this.context = getContext();
+        mApiinterface = ApiClient.getClient().create(ApiInterface.class);
+        session = new SessionManager(context);
+        currUser = new Users();
+        currUser = session.getUserDetails();
         dbHelper = new DBHelper(context);
         Bundle bund = getArguments();
         if (bund !=null){
             if (bund.containsKey("id_dompet")){
                 id_dompet = bund.getString("id_dompet");
                 curdompet = new Dompet();
-                curdompet = dbHelper.getDompet(id_dompet);
-                dbHelper.closeDB();
+                final Call<NewDompet> curdomp = mApiinterface.getdompet(currUser.token,id_dompet);
+                curdomp.enqueue(new Callback<NewDompet>() {
+                    @Override
+                    public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
+                        if (response.isSuccessful()){
+                            curdompet = response.body().getDompet();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<NewDompet> call, Throwable t) {
+
+                    }
+                });
+
             }
         }
         tgl1 = view.findViewById(R.id.in_date1);
@@ -123,19 +152,30 @@ public class TabInFrag extends Fragment {
                                         switch (which){
                                             case DialogInterface.BUTTON_POSITIVE:
                                                 updatetotal();
-                                                double jm = inList.get(position).getJumlah();
-                                                double awal = curdompet.getSaldo();
+                                                final double jm = inList.get(position).getJumlah();
+                                                final double awal = curdompet.getSaldo();
 
                                                 if ((awal-jm) < 0){
                                                     alert.showAlertDialog(context,"Transaction","Saldo tidak mencukupi !",false);
                                                 }else {
-                                                    dbHelper.deleteIn(inList.get(position).getId_in());
-                                                    dbHelper.closeDB();
-                                                    curdompet.setSaldo(awal-jm);
-                                                    dbHelper.updateDompet(curdompet);
-                                                    dbHelper.closeDB();
-                                                    adapterIn.removeAt(position);
-                                                    updatetotal();
+                                                    Call<NewIn> delin = mApiinterface.delIn(currUser.token,inList.get(position).getId_in());
+                                                    delin.enqueue(new Callback<NewIn>() {
+                                                        @Override
+                                                        public void onResponse(Call<NewIn> call, Response<NewIn> response) {
+                                                            if (response.isSuccessful()){
+
+                                                                curdompet.setSaldo(awal-jm);
+                                                                adapterIn.removeAt(position);
+                                                                updatetotal();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Call<NewIn> call, Throwable t) {
+
+                                                        }
+                                                    });
+
                                                 }
 
                                                 break;
@@ -250,19 +290,46 @@ public class TabInFrag extends Fragment {
 
     private void populateIn(String dt1, String dt2, Dompet domp){
         inList.clear();
-        inList = dbHelper.getInTrans(dt1,dt2,domp);
-        dbHelper.closeDB();
-        updatetotal();
-        adapterIn.setListContent(inList);
-        recyclerView.setAdapter(adapterIn);
+        Call<GetIn> allin = mApiinterface.getallIn(currUser.token,dt1,dt2,domp.getId_dompet());
+        allin.enqueue(new Callback<GetIn>() {
+            @Override
+            public void onResponse(Call<GetIn> call, Response<GetIn> response) {
+                if (response.isSuccessful()){
+                    inList = response.body().getListIn();
+                    updatetotal();
+                    adapterIn.setListContent(inList);
+                    recyclerView.setAdapter(adapterIn);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetIn> call, Throwable t) {
+
+            }
+        });
+
     }
     private void updatetotal(){
         double t_in = 0;
         for (int i =0; i < inList.size(); i++){
             t_in = t_in + inList.get(i).getJumlah();
         }
-        curdompet = dbHelper.getDompet(id_dompet);
-        dbHelper.closeDB();
+        Call<NewDompet> upd = mApiinterface.getdompet(currUser.token,id_dompet);
+        upd.enqueue(new Callback<NewDompet>() {
+            @Override
+            public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
+                if (response.isSuccessful()){
+                    curdompet = response.body().getDompet();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NewDompet> call, Throwable t) {
+
+            }
+        });
+
+
         txttotal.setText("Total : Rp "+ NumberFormat.getInstance().format(t_in));
         listener.getDompetdata(curdompet.getId_dompet());
     }
@@ -326,14 +393,26 @@ public class TabInFrag extends Fragment {
                         in.setTgl_in(txttgl_in.getText().toString());
                         in.setJumlah(tambah);
                         in.setKet_in(txtket_in.getText().toString());
-                        String id = dbHelper.createIn(in,curdompet.getId_dompet());
-                        dbHelper.closeDB();
-                        inList.add(dbHelper.getIn(id));
-                        dbHelper.closeDB();
-                        curdompet.setSaldo(curdompet.getSaldo()+tambah);
-                        dbHelper.updateDompet(curdompet);
-                        dbHelper.closeDB();
-                        adapterIn.notifyDataSetChanged();
+                        Call<NewIn> createIn = mApiinterface.createIn(currUser.token,in);
+                        final double finalTambah = tambah;
+                        createIn.enqueue(new Callback<NewIn>() {
+                            @Override
+                            public void onResponse(Call<NewIn> call, Response<NewIn> response) {
+                                if (response.isSuccessful()){
+                                   InTrans inp = new InTrans();
+                                   inp = response.body().getmIn();
+                                    inList.add(inp);
+                                    curdompet.setSaldo(curdompet.getSaldo()+ finalTambah);
+                                    adapterIn.notifyDataSetChanged();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<NewIn> call, Throwable t) {
+
+                            }
+                        });
+
                         updatetotal();
                         dialog.dismiss();
                     }catch (NumberFormatException e){
@@ -419,11 +498,22 @@ public class TabInFrag extends Fragment {
                             curIn.setTgl_in(txttgl_in.getText().toString());
                             curIn.setJumlah(tambah);
                             curIn.setKet_in(txtket_in.getText().toString());
-                            dbHelper.updateIn(curIn);
-                            dbHelper.closeDB();
-                            curdompet.setSaldo((saldo-awal)+tambah);
-                            dbHelper.updateDompet(curdompet);
-                            dbHelper.closeDB();
+                            Call<NewIn> inUpd = mApiinterface.updIn(currUser.token,curIn);
+                            inUpd.enqueue(new Callback<NewIn>() {
+                                @Override
+                                public void onResponse(Call<NewIn> call, Response<NewIn> response) {
+                                    if (response.isSuccessful()){
+
+
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<NewIn> call, Throwable t) {
+
+                                }
+                            });
+
                             populateIn(tgl1.getText().toString(),tgl2.getText().toString(),curdompet);
                             dialog.dismiss();
                         }

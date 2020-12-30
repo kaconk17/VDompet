@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     View dialogview;
     EditText txt_dompet;
     String nama_dompet;
-    DBHelper dbHelper;
+
 
     private Users currUser;
     private RecyclerView recyclerView;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Dompet> dompetlist;
     private LinearLayoutManager linearLayoutManager;
     private ApiInterface mApiinterface;
+    private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         mApiinterface = ApiClient.getClient().create(ApiInterface.class);
         dompetlist = new ArrayList<>();
 
-        dbHelper = new DBHelper(MainActivity.this);
+
         fab = findViewById(R.id.fab);
         if (!session.isLoggedIn()){
             Intent i = new Intent(getApplicationContext(), LoginActivity.class);
@@ -243,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
                         if (response.isSuccessful()){
                             Dompet domp = new Dompet();
                             domp = response.body().getDompet();
-                            Log.d("dompet",domp.toString());
+
                             dompetlist.add(domp);
                             adapter.notifyDataSetChanged();
                             dialog.dismiss();
@@ -297,13 +299,40 @@ public class MainActivity extends AppCompatActivity {
 
         dialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-
+            public void onClick(final DialogInterface dialog, int which) {
                 dp.setNama_dompet(txt_dompet.getText().toString());
-                dbHelper.updateDompet(dp);
-                dbHelper.closeDB();
-                populateData();
-                dialog.dismiss();
+                Call<NewDompet> editdompet = mApiinterface.updatedompet(currUser.token,dp.getId_dompet(),dp);
+                editdompet.enqueue(new Callback<NewDompet>() {
+                    @Override
+                    public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
+                        if (response.isSuccessful()){
+                            populateData();
+                            dialog.dismiss();
+                        }else {
+                            try {
+                                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(MainActivity.this);
+                                builder.setMessage(jObjError.getString("error"))
+                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                            }
+                                        });
+                                builder.create();
+                                builder.show();
+                            } catch (Exception e) {
+                                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<NewDompet> call, Throwable t) {
+
+                    }
+                });
+
             }
         });
         dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -317,11 +346,14 @@ public class MainActivity extends AppCompatActivity {
    private void populateData(){
 
        dompetlist.clear();
+
        Call<GetDompet> getallDompet = mApiinterface.getalldompet(currUser.token);
        getallDompet.enqueue(new Callback<GetDompet>() {
            @Override
            public void onResponse(Call<GetDompet> call, Response<GetDompet> response) {
+              
                if (response.isSuccessful()){
+
                    dompetlist = response.body().getListDompet();
                    adapter.setListContent(dompetlist);
                    recyclerView.setAdapter(adapter);

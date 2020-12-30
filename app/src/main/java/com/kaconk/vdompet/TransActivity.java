@@ -19,17 +19,25 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
+import com.kaconk.vdompet.Model.NewDompet;
+import com.kaconk.vdompet.Rest.ApiClient;
+import com.kaconk.vdompet.Rest.ApiInterface;
 
 import java.text.NumberFormat;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TransActivity extends AppCompatActivity implements EventListener {
     private TabAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private Dompet curdomp;
-    private DBHelper dbHelper;
+    private ApiInterface mApiinterface;
+    private SessionManager session;
+    private Users currUser;
 
 
     private TextView NamaDompet, SaldoDompet;
@@ -37,13 +45,15 @@ public class TransActivity extends AppCompatActivity implements EventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trans);
-
+        session = new SessionManager(getApplicationContext());
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
         String id_domp = (String) getIntent().getSerializableExtra("id_domp");
         NamaDompet = findViewById(R.id.namedompet);
         SaldoDompet = findViewById(R.id.statSaldo);
-
+        mApiinterface = ApiClient.getClient().create(ApiInterface.class);
+        currUser =  new Users();
+        currUser = session.getUserDetails();
         Bundle dt = new Bundle();
         dt.putString("id_dompet",id_domp);
         Fragment fone = new TabInFrag();
@@ -58,8 +68,6 @@ public class TransActivity extends AppCompatActivity implements EventListener {
         adapter.addFragment(fthr,"History");
 
         curdomp = new Dompet();
-
-        dbHelper = new DBHelper(TransActivity.this);
         getDompetdata(id_domp);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -69,10 +77,23 @@ public class TransActivity extends AppCompatActivity implements EventListener {
     }
 
     public void getDompetdata(String id){
-        curdomp = dbHelper.getDompet(id);
-        dbHelper.closeDB();
-        SaldoDompet.setText("Saldo : Rp "+NumberFormat.getInstance().format(curdomp.getSaldo()));
-        NamaDompet.setText(curdomp.getNama_dompet());
+        Call<NewDompet> getdomp = mApiinterface.getdompet(currUser.token,id);
+        getdomp.enqueue(new Callback<NewDompet>() {
+            @Override
+            public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
+                if (response.isSuccessful()){
+                    curdomp = response.body().getDompet();
+                    SaldoDompet.setText("Saldo : Rp "+NumberFormat.getInstance().format(curdomp.getSaldo()));
+                    NamaDompet.setText(curdomp.getNama_dompet());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NewDompet> call, Throwable t) {
+
+            }
+        });
+
     }
 
 }
