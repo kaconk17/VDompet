@@ -1,28 +1,32 @@
 package com.kaconk.vdompet;
 
+import com.google.gson.annotations.SerializedName;
+
 public class History {
-    String id_hyst;
+   @SerializedName("id_dompet")
     String id_dompet;
+   @SerializedName("tgl")
     String tgl;
+   @SerializedName("ket")
     String ket;
+   @SerializedName("jumlah")
     double jumlah;
+   @SerializedName("jenis")
     String jenis;
 
     public History(){
 
     }
 
-    public History(String id, String id_dompet, String tgl, String ket, double juml, String jenis){
-        this.id_hyst = id;
+    public History(String id_dompet, String tgl, String ket, double juml, String jenis){
+
         this.id_dompet = id_dompet;
         this.tgl = tgl;
         this.ket = ket;
         this.jumlah = juml;
         this.jenis = jenis;
     }
-    public void setId_hyst(String id){
-        this.id_hyst = id;
-    }
+
     public void setId_dompet(String id_domp){
         this.id_dompet = id_domp;
     }
@@ -38,9 +42,7 @@ public class History {
     public void setJenis(String jenis){
         this.jenis = jenis;
     }
-    public String getId_hyst(){
-        return this.id_hyst;
-    }
+
     public String getId_dompet(){
         return this.id_dompet;
     }

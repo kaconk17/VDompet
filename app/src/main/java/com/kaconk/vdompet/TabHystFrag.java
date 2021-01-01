@@ -19,6 +19,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kaconk.vdompet.Model.GetHystory;
+import com.kaconk.vdompet.Model.GetIn;
+import com.kaconk.vdompet.Model.NewDompet;
+import com.kaconk.vdompet.Rest.ApiClient;
+import com.kaconk.vdompet.Rest.ApiInterface;
+
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +32,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TabHystFrag extends Fragment {
     private Context context;
@@ -41,8 +51,10 @@ public class TabHystFrag extends Fragment {
     private RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
     private DividerItemDecoration divider;
+    private ApiInterface mApiinterface;
+    private Users currUser;
+    private SessionManager session;
 
-    DBHelper dbHelper;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_hyst, container, false);
@@ -50,7 +62,12 @@ public class TabHystFrag extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view,savedInstanceState);
         this.context = getContext();
-        dbHelper = new DBHelper(context);
+        session = new SessionManager(context);
+        currUser =  new Users();
+        mApiinterface = ApiClient.getClient().create(ApiInterface.class);
+        currUser = session.getUserDetails();
+
+       
         Bundle bund = getArguments();
         tgl1 = view.findViewById(R.id.hyst_date1);
         tgl2 = view.findViewById(R.id.hyst_date2);
@@ -69,8 +86,22 @@ public class TabHystFrag extends Fragment {
             if (bund.containsKey("id_dompet")){
                 id_dompet = bund.getString("id_dompet");
                 curdomp = new Dompet();
-                curdomp = dbHelper.getDompet(id_dompet);
-                dbHelper.closeDB();
+                Call<NewDompet> getdomp = mApiinterface.getdompet(currUser.token,id_dompet);
+                getdomp.enqueue(new Callback<NewDompet>() {
+                    @Override
+                    public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
+                        if (response.isSuccessful()){
+                            curdomp = response.body().getDompet();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<NewDompet> call, Throwable t) {
+
+                    }
+                });
+
             }
         }
         df = new SimpleDateFormat("yyyy-MM-dd");
@@ -78,11 +109,12 @@ public class TabHystFrag extends Fragment {
         c.set(Calendar.DAY_OF_MONTH,1);
         allHist = new ArrayList<>();
 
+        /*
         for (int i=0; i<allHist.size(); i++){
             Log.d("History",allHist.get(i).getTgl()+", "+allHist.get(i).getKet()+", "+String.valueOf(allHist.get(i).getJumlah()));
 
         }
-
+        */
         tgl1.setText(df.format(c.getTime()));
         tgl2.setText(df.format(new Date()));
 
@@ -161,20 +193,31 @@ public class TabHystFrag extends Fragment {
         List<OutTrans> allout = new ArrayList<>();
         double totin =0;
         double totout = 0;
-        allin = dbHelper.getInTrans(dt1,dt2,domp);
-        dbHelper.closeDB();
-        allout = dbHelper.getOutTrans(dt1,dt2,domp);
-        dbHelper.closeDB();
-        for (int i=0; i<allin.size();i++){
-            totin = totin + allin.get(i).getJumlah();
-        }
-        for (int i =0; i<allout.size(); i++){
-            totout = totout+allout.get(i).getJumlah();
+        allHist.clear();
+        Call<GetHystory> allhyst = mApiinterface.getHist(currUser.token,domp.getId_dompet(),dt1,dt2);
+        allhyst.enqueue(new Callback<GetHystory>() {
+            @Override
+            public void onResponse(Call<GetHystory> call, Response<GetHystory> response) {
+                if (response.isSuccessful()){
+                    allHist = response.body().getListHyst();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetHystory> call, Throwable t) {
+
+            }
+        });
+
+        for (int i=0; i<allHist.size();i++){
+            if (allHist.get(i).getJenis().equals("IN")){
+                totin = totin + allHist.get(i).getJumlah();
+            }else {
+                totout = totout + allHist.get(i).getJumlah();
+            }
+
         }
 
-        allHist.clear();
-        allHist = dbHelper.getHistory(dt1, dt2,domp);
-        dbHelper.closeDB();
         adapter.setListContent(allHist);
         recyclerView.setAdapter(adapter);
         txtallin.setText("Total IN : Rp "+ NumberFormat.getInstance().format(totin));

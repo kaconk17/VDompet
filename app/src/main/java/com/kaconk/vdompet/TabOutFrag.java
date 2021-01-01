@@ -85,7 +85,7 @@ public class TabOutFrag extends Fragment {
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
         this.context = getContext();
-       
+
         session = new SessionManager(context);
         currUser =  new Users();
         mApiinterface = ApiClient.getClient().create(ApiInterface.class);

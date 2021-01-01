@@ -5,6 +5,7 @@ import android.text.GetChars;
 import com.kaconk.vdompet.Dompet;
 import com.kaconk.vdompet.InTrans;
 import com.kaconk.vdompet.Model.GetDompet;
+import com.kaconk.vdompet.Model.GetHystory;
 import com.kaconk.vdompet.Model.GetIn;
 import com.kaconk.vdompet.Model.GetOut;
 import com.kaconk.vdompet.Model.GetUser;
@@ -67,4 +68,8 @@ public interface ApiInterface {
     Call<NewOut> createOut(@Header("token") String token, @Body OutTrans out);
     @PUT("api/out/update/{outId}")
     Call<NewOut> updOut(@Header("token") String token, @Body OutTrans out);
+
+    //History
+    @GET("api/dompet/history/{dompetId}")
+    Call<GetHystory> getHist(@Header("token") String token, @Path("dompetId") String id, @Query("tgl1") String tgl1, @Query("tgl2") String tgl2);
 }
