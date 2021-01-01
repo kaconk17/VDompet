@@ -6,9 +6,12 @@ import com.kaconk.vdompet.Dompet;
 import com.kaconk.vdompet.InTrans;
 import com.kaconk.vdompet.Model.GetDompet;
 import com.kaconk.vdompet.Model.GetIn;
+import com.kaconk.vdompet.Model.GetOut;
 import com.kaconk.vdompet.Model.GetUser;
 import com.kaconk.vdompet.Model.NewDompet;
 import com.kaconk.vdompet.Model.NewIn;
+import com.kaconk.vdompet.Model.NewOut;
+import com.kaconk.vdompet.OutTrans;
 import com.kaconk.vdompet.Users;
 
 import retrofit2.Call;
@@ -27,10 +30,13 @@ public interface ApiInterface {
     @Headers({
             "Content-Type: application/json"
     })
+    //Auth api
     @POST("api/auth/signup")
     Call<GetUser> createUser(@Body Users user);
     @POST("api/auth/signin")
     Call<GetUser> signIn(@Body Users user);
+
+    //Dompet api
     @GET("api/dompet/getall")
     Call<GetDompet> getalldompet(@Header("token") String token);
     @POST("api/dompet/create")
@@ -41,6 +47,8 @@ public interface ApiInterface {
     Call<NewDompet> updatedompet(@Header("token") String token, @Path("dompetId") String id, @Body Dompet dompet);
     @GET("api/dompet/getdompet/{dompetId}")
     Call<NewDompet> getdompet(@Header("token") String token, @Path("dompetId") String id);
+
+    //IN api
     @DELETE("api/in/del/{inId}")
     Call<NewIn> delIn(@Header("token") String token, @Path("inId") String id);
     @GET("api/in/getall")
@@ -49,4 +57,14 @@ public interface ApiInterface {
     Call<NewIn> createIn(@Header("token") String token, @Body InTrans in);
     @PUT("api/in/update/{inId}")
     Call<NewIn> updIn(@Header("token") String token, @Body InTrans in);
+
+    //Out api
+    @DELETE("api/out/del/{outId}")
+    Call<NewOut> delOut(@Header("token") String token, @Path("outId") String id);
+    @GET("api/out/getall")
+    Call<GetOut> getallOut(@Header("token") String token, @Query("tgl1") String tgl1, @Query("tgl2") String tgl2, @Query("dompetid") String id);
+    @POST("api/out/create")
+    Call<NewOut> createOut(@Header("token") String token, @Body OutTrans out);
+    @PUT("api/out/update/{outId}")
+    Call<NewOut> updOut(@Header("token") String token, @Body OutTrans out);
 }

@@ -1,10 +1,17 @@
 package com.kaconk.vdompet;
 
+import com.google.gson.annotations.SerializedName;
+
 public class OutTrans {
+    @SerializedName("id_out")
     String id_out;
+    @SerializedName("id_dompet")
     String id_dompet;
+    @SerializedName("tgl_out")
     String tgl_out;
+    @SerializedName("ket_out")
     String ket_out;
+    @SerializedName("jumlah")
     double jumlah;
 
     public OutTrans(){

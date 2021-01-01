@@ -54,7 +54,6 @@ public class TabInFrag extends Fragment {
     private String id_dompet;
     private FloatingActionButton fab;
     private Dompet curdompet;
-    private DBHelper dbHelper;
     private RecyclerView recyclerView;
     private AdapterIn adapterIn;
     private List<InTrans> inList;
@@ -91,7 +90,6 @@ public class TabInFrag extends Fragment {
         session = new SessionManager(context);
         currUser = new Users();
         currUser = session.getUserDetails();
-        dbHelper = new DBHelper(context);
         Bundle bund = getArguments();
         if (bund !=null){
             if (bund.containsKey("id_dompet")){

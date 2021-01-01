@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
        getallDompet.enqueue(new Callback<GetDompet>() {
            @Override
            public void onResponse(Call<GetDompet> call, Response<GetDompet> response) {
-              
+
                if (response.isSuccessful()){
 
                    dompetlist = response.body().getListDompet();
