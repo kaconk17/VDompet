@@ -57,7 +57,7 @@ public interface ApiInterface {
     @POST("api/in/create")
     Call<NewIn> createIn(@Header("token") String token, @Body InTrans in);
     @PUT("api/in/update/{inId}")
-    Call<NewIn> updIn(@Header("token") String token, @Body InTrans in);
+    Call<NewIn> updIn(@Header("token") String token,@Path("inId") String id, @Body InTrans in);
 
     //Out api
     @DELETE("api/out/del/{outId}")
@@ -67,7 +67,7 @@ public interface ApiInterface {
     @POST("api/out/create")
     Call<NewOut> createOut(@Header("token") String token, @Body OutTrans out);
     @PUT("api/out/update/{outId}")
-    Call<NewOut> updOut(@Header("token") String token, @Body OutTrans out);
+    Call<NewOut> updOut(@Header("token") String token, @Path("outId") String id, @Body OutTrans out);
 
     //History
     @GET("api/dompet/history/{dompetId}")

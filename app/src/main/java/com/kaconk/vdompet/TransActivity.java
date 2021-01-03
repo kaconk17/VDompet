@@ -49,6 +49,7 @@ public class TransActivity extends AppCompatActivity implements EventListener {
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
         String id_domp = (String) getIntent().getSerializableExtra("id_domp");
+
         NamaDompet = findViewById(R.id.namedompet);
         SaldoDompet = findViewById(R.id.statSaldo);
         mApiinterface = ApiClient.getClient().create(ApiInterface.class);
@@ -69,6 +70,7 @@ public class TransActivity extends AppCompatActivity implements EventListener {
 
         curdomp = new Dompet();
         getDompetdata(id_domp);
+
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 

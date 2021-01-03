@@ -201,7 +201,7 @@ public class TabInFrag extends Fragment {
             }
         }));
 
-        populateIn(dateFormat.format(c.getTime()),dateFormat.format(new Date()),curdompet);
+        populateIn(dateFormat.format(c.getTime()),dateFormat.format(new Date()),id_dompet);
 
         tgl2.setText(dateFormat.format(new Date()));
         tgl1.setText(dateFormat.format(c.getTime()));
@@ -279,16 +279,16 @@ public class TabInFrag extends Fragment {
         cari_in.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                populateIn(tgl1.getText().toString(),tgl2.getText().toString(),curdompet);
+                populateIn(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
             }
         });
     }
 
 
 
-    private void populateIn(String dt1, String dt2, Dompet domp){
+    private void populateIn(String dt1, String dt2, String id){
         inList.clear();
-        Call<GetIn> allin = mApiinterface.getallIn(currUser.token,dt1,dt2,domp.getId_dompet());
+        Call<GetIn> allin = mApiinterface.getallIn(currUser.token,dt1,dt2,id);
         allin.enqueue(new Callback<GetIn>() {
             @Override
             public void onResponse(Call<GetIn> call, Response<GetIn> response) {
@@ -312,24 +312,10 @@ public class TabInFrag extends Fragment {
         for (int i =0; i < inList.size(); i++){
             t_in = t_in + inList.get(i).getJumlah();
         }
-        Call<NewDompet> upd = mApiinterface.getdompet(currUser.token,id_dompet);
-        upd.enqueue(new Callback<NewDompet>() {
-            @Override
-            public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
-                if (response.isSuccessful()){
-                    curdompet = response.body().getDompet();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<NewDompet> call, Throwable t) {
-
-            }
-        });
-
 
         txttotal.setText("Total : Rp "+ NumberFormat.getInstance().format(t_in));
-        listener.getDompetdata(curdompet.getId_dompet());
+        listener.getDompetdata(id_dompet);
+
     }
 
     private void dialogForm(){
@@ -388,6 +374,7 @@ public class TabInFrag extends Fragment {
                     try{
                         updatetotal();
                         tambah = Double.parseDouble(juml);
+                        in.setId_dompet(id_dompet);
                         in.setTgl_in(txttgl_in.getText().toString());
                         in.setJumlah(tambah);
                         in.setKet_in(txtket_in.getText().toString());
@@ -496,12 +483,12 @@ public class TabInFrag extends Fragment {
                             curIn.setTgl_in(txttgl_in.getText().toString());
                             curIn.setJumlah(tambah);
                             curIn.setKet_in(txtket_in.getText().toString());
-                            Call<NewIn> inUpd = mApiinterface.updIn(currUser.token,curIn);
+                            Call<NewIn> inUpd = mApiinterface.updIn(currUser.token,curIn.getId_in(),curIn);
                             inUpd.enqueue(new Callback<NewIn>() {
                                 @Override
                                 public void onResponse(Call<NewIn> call, Response<NewIn> response) {
                                     if (response.isSuccessful()){
-
+                                        populateIn(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
 
                                     }
                                 }
@@ -512,7 +499,7 @@ public class TabInFrag extends Fragment {
                                 }
                             });
 
-                            populateIn(tgl1.getText().toString(),tgl2.getText().toString(),curdompet);
+
                             dialog.dismiss();
                         }
 

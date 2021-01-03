@@ -195,7 +195,7 @@ public class TabOutFrag extends Fragment {
                 popup.show();
             }
         }));
-        populateOut(dateFormat.format(c.getTime()),dateFormat.format(new Date()),curdompet);
+        populateOut(dateFormat.format(c.getTime()),dateFormat.format(new Date()),id_dompet);
         tgl2.setText(dateFormat.format(new Date()));
         tgl1.setText(dateFormat.format(c.getTime()));
         tgl1.setOnClickListener(new View.OnClickListener() {
@@ -269,19 +269,21 @@ public class TabOutFrag extends Fragment {
         cari_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                populateOut(tgl1.getText().toString(),tgl2.getText().toString(),curdompet);
+                populateOut(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
             }
         });
     }
 
-    private void populateOut(String dt1, String dt2, Dompet domp){
+    private void populateOut(String dt1, String dt2, String id){
         outList.clear();
-        Call<GetOut> getoutAll = mApiinterface.getallOut(currUser.token,dt1,dt2,domp.getId_dompet());
+        Call<GetOut> getoutAll = mApiinterface.getallOut(currUser.token,dt1,dt2,id);
         getoutAll.enqueue(new Callback<GetOut>() {
             @Override
             public void onResponse(Call<GetOut> call, Response<GetOut> response) {
                 if (response.isSuccessful()){
                     outList = response.body().getListOut();
+                    adapterOut.setListContent(outList);
+                    recyclerView.setAdapter(adapterOut);
                     updatetotal();
                 }
             }
@@ -292,31 +294,17 @@ public class TabOutFrag extends Fragment {
             }
         });
 
-       adapterOut.setListContent(outList);
-        recyclerView.setAdapter(adapterOut);
+
     }
     private void updatetotal(){
         double t_in = 0;
         for (int i =0; i < outList.size(); i++){
             t_in = t_in + outList.get(i).getJumlah();
         }
-        Call<NewDompet> getdomp = mApiinterface.getdompet(currUser.token,curdompet.getId_dompet());
-        getdomp.enqueue(new Callback<NewDompet>() {
-            @Override
-            public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
-                if (response.isSuccessful()){
-                    curdompet = response.body().getDompet();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<NewDompet> call, Throwable t) {
-
-            }
-        });
 
         txttotal.setText("Total : Rp "+ NumberFormat.getInstance().format(t_in));
-        listener.getDompetdata(curdompet.getId_dompet());
+        listener.getDompetdata(id_dompet);
     }
     private void dialogForm(){
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
@@ -374,6 +362,7 @@ public class TabOutFrag extends Fragment {
                     try{
                         updatetotal();
                         tambah = Double.parseDouble(juml);
+                        out.setId_dompet(id_dompet);
                         out.setTgl_out(txttgl_out.getText().toString());
                         out.setJumlah(tambah);
                         out.setKet_out(txtket_out.getText().toString());
@@ -391,6 +380,8 @@ public class TabOutFrag extends Fragment {
                                         newout = response.body().getmOut();
                                         outList.add(newout);
                                         curdompet.setSaldo(curdompet.getSaldo()- finalTambah);
+                                        adapterOut.notifyDataSetChanged();
+                                        updatetotal();
                                     }
                                 }
 
@@ -400,8 +391,7 @@ public class TabOutFrag extends Fragment {
                                 }
                             });
 
-                            adapterOut.notifyDataSetChanged();
-                            updatetotal();
+
                             dialog.dismiss();
                         }
 
@@ -487,7 +477,7 @@ public class TabOutFrag extends Fragment {
                             curout.setTgl_out(txttgl_out.getText().toString());
                             curout.setJumlah(tambah);
                             curout.setKet_out(txtket_out.getText().toString());
-                            Call<NewOut> upd = mApiinterface.updOut(currUser.token,curout);
+                            Call<NewOut> upd = mApiinterface.updOut(currUser.token,curout.getId_out(),curout);
                             final double finalTambah = tambah;
                             upd.enqueue(new Callback<NewOut>() {
                                 @Override
@@ -504,7 +494,7 @@ public class TabOutFrag extends Fragment {
                             });
 
 
-                            populateOut(tgl1.getText().toString(),tgl2.getText().toString(),curdompet);
+                            populateOut(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
 
                             dialog.dismiss();
                         }

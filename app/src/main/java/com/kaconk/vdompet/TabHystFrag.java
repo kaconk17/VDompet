@@ -42,7 +42,6 @@ public class TabHystFrag extends Fragment {
     private List<History> allHist;
     private SimpleDateFormat df;
     private String id_dompet;
-    private Dompet curdomp;
     private EditText tgl1, tgl2;
     private ImageButton cari_hyst;
     private DatePickerDialog picker;
@@ -67,7 +66,7 @@ public class TabHystFrag extends Fragment {
         mApiinterface = ApiClient.getClient().create(ApiInterface.class);
         currUser = session.getUserDetails();
 
-       
+
         Bundle bund = getArguments();
         tgl1 = view.findViewById(R.id.hyst_date1);
         tgl2 = view.findViewById(R.id.hyst_date2);
@@ -85,22 +84,6 @@ public class TabHystFrag extends Fragment {
         if (bund !=null){
             if (bund.containsKey("id_dompet")){
                 id_dompet = bund.getString("id_dompet");
-                curdomp = new Dompet();
-                Call<NewDompet> getdomp = mApiinterface.getdompet(currUser.token,id_dompet);
-                getdomp.enqueue(new Callback<NewDompet>() {
-                    @Override
-                    public void onResponse(Call<NewDompet> call, Response<NewDompet> response) {
-                        if (response.isSuccessful()){
-                            curdomp = response.body().getDompet();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<NewDompet> call, Throwable t) {
-
-                    }
-                });
 
             }
         }
@@ -183,23 +166,37 @@ public class TabHystFrag extends Fragment {
         cari_hyst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                populateHist(tgl1.getText().toString(),tgl2.getText().toString(),curdomp);
+                populateHist(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
             }
         });
-        populateHist(df.format(c.getTime()), df.format(new Date()), curdomp);
+        populateHist(df.format(c.getTime()), df.format(new Date()), id_dompet);
     }
-    private void populateHist(String dt1, String dt2, Dompet domp){
+    private void populateHist(String dt1, String dt2, String id){
         List<InTrans> allin = new ArrayList<>();
         List<OutTrans> allout = new ArrayList<>();
-        double totin =0;
-        double totout = 0;
+
         allHist.clear();
-        Call<GetHystory> allhyst = mApiinterface.getHist(currUser.token,domp.getId_dompet(),dt1,dt2);
+        Call<GetHystory> allhyst = mApiinterface.getHist(currUser.token,id,dt1,dt2);
         allhyst.enqueue(new Callback<GetHystory>() {
             @Override
             public void onResponse(Call<GetHystory> call, Response<GetHystory> response) {
                 if (response.isSuccessful()){
                     allHist = response.body().getListHyst();
+                    double totin =0;
+                    double totout = 0;
+                    for (int i=0; i<allHist.size();i++){
+                        if (allHist.get(i).getJenis().equals("IN")){
+                            totin = totin + allHist.get(i).getJumlah();
+                        }else {
+                            totout = totout + allHist.get(i).getJumlah();
+                        }
+
+                    }
+
+                    adapter.setListContent(allHist);
+                    recyclerView.setAdapter(adapter);
+                    txtallin.setText("Total IN : Rp "+ NumberFormat.getInstance().format(totin));
+                    txtallout.setText("Total OUT : Rp "+NumberFormat.getInstance().format(totout));
                 }
             }
 
@@ -209,19 +206,7 @@ public class TabHystFrag extends Fragment {
             }
         });
 
-        for (int i=0; i<allHist.size();i++){
-            if (allHist.get(i).getJenis().equals("IN")){
-                totin = totin + allHist.get(i).getJumlah();
-            }else {
-                totout = totout + allHist.get(i).getJumlah();
-            }
 
-        }
-
-        adapter.setListContent(allHist);
-        recyclerView.setAdapter(adapter);
-        txtallin.setText("Total IN : Rp "+ NumberFormat.getInstance().format(totin));
-        txtallout.setText("Total OUT : Rp "+NumberFormat.getInstance().format(totout));
     }
 
 }
