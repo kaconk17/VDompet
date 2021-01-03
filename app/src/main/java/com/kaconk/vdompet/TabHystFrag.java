@@ -1,6 +1,7 @@
 package com.kaconk.vdompet;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -53,6 +54,7 @@ public class TabHystFrag extends Fragment {
     private ApiInterface mApiinterface;
     private Users currUser;
     private SessionManager session;
+    private ProgressDialog pDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,7 +67,7 @@ public class TabHystFrag extends Fragment {
         currUser =  new Users();
         mApiinterface = ApiClient.getClient().create(ApiInterface.class);
         currUser = session.getUserDetails();
-
+        pDialog = new ProgressDialog(context);
 
         Bundle bund = getArguments();
         tgl1 = view.findViewById(R.id.hyst_date1);
@@ -166,9 +168,14 @@ public class TabHystFrag extends Fragment {
         cari_hyst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pDialog.setMessage("Loading....");
+                pDialog.show();
                 populateHist(tgl1.getText().toString(),tgl2.getText().toString(),id_dompet);
             }
         });
+
+        pDialog.setMessage("Loading....");
+        pDialog.show();
         populateHist(df.format(c.getTime()), df.format(new Date()), id_dompet);
     }
     private void populateHist(String dt1, String dt2, String id){
@@ -181,6 +188,7 @@ public class TabHystFrag extends Fragment {
             @Override
             public void onResponse(Call<GetHystory> call, Response<GetHystory> response) {
                 if (response.isSuccessful()){
+                    pDialog.hide();
                     allHist = response.body().getListHyst();
                     double totin =0;
                     double totout = 0;

@@ -168,6 +168,9 @@ public class MainActivity extends AppCompatActivity {
                 popup.show();
             }
         }));
+        pDialog = new ProgressDialog(MainActivity.this);
+        pDialog.setMessage("Loading....");
+        pDialog.show();
         populateData();
 
 
@@ -353,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
            public void onResponse(Call<GetDompet> call, Response<GetDompet> response) {
 
                if (response.isSuccessful()){
-
+                    pDialog.hide();
                    dompetlist = response.body().getListDompet();
                    adapter.setListContent(dompetlist);
                    recyclerView.setAdapter(adapter);

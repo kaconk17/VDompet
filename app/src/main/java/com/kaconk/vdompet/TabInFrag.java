@@ -2,6 +2,7 @@ package com.kaconk.vdompet;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -64,6 +65,7 @@ public class TabInFrag extends Fragment {
     private ApiInterface mApiinterface;
     private Users currUser;
     private SessionManager session;
+    private ProgressDialog pDialog;
     Alertdialog alert = new Alertdialog();
 
     @Override
@@ -90,6 +92,7 @@ public class TabInFrag extends Fragment {
         session = new SessionManager(context);
         currUser = new Users();
         currUser = session.getUserDetails();
+        pDialog = new ProgressDialog(context);
         Bundle bund = getArguments();
         if (bund !=null){
             if (bund.containsKey("id_dompet")){
@@ -201,6 +204,8 @@ public class TabInFrag extends Fragment {
             }
         }));
 
+        pDialog.setMessage("Loading....");
+        pDialog.show();
         populateIn(dateFormat.format(c.getTime()),dateFormat.format(new Date()),id_dompet);
 
         tgl2.setText(dateFormat.format(new Date()));
@@ -293,6 +298,7 @@ public class TabInFrag extends Fragment {
             @Override
             public void onResponse(Call<GetIn> call, Response<GetIn> response) {
                 if (response.isSuccessful()){
+                    pDialog.hide();
                     inList = response.body().getListIn();
                     updatetotal();
                     adapterIn.setListContent(inList);
@@ -389,6 +395,7 @@ public class TabInFrag extends Fragment {
                                     inList.add(inp);
                                     curdompet.setSaldo(curdompet.getSaldo()+ finalTambah);
                                     adapterIn.notifyDataSetChanged();
+                                    updatetotal();
                                 }
                             }
 
@@ -398,7 +405,7 @@ public class TabInFrag extends Fragment {
                             }
                         });
 
-                        updatetotal();
+
                         dialog.dismiss();
                     }catch (NumberFormatException e){
                         e.printStackTrace();
