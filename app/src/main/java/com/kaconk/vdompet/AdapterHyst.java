@@ -2,6 +2,7 @@ package com.kaconk.vdompet;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +12,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AdapterHyst extends RecyclerView.Adapter<AdapterHyst.HystHolder> {
     private Context context;
     private final LayoutInflater inflater;
     private List<History> datalist = new ArrayList<>();
+    private SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
     HystHolder holder;
     View view;
 
@@ -37,18 +42,24 @@ public class AdapterHyst extends RecyclerView.Adapter<AdapterHyst.HystHolder> {
     @Override
     public void onBindViewHolder(@NonNull HystHolder holder, int position) {
         History history = datalist.get(position);
+        try{
+            Date date = dateFormat.parse(history.getTgl());
+            holder.tgl_hyst.setText(dateFormat.format(date));
+        }catch (ParseException e){
+            Log.d("error : ",e.toString());
+        }
         if (history.getJenis().equals("IN")){
-            holder.tgl_hyst.setText(history.getTgl());
+
             holder.jumlah.setText("+ Rp "+ NumberFormat.getInstance().format(history.getJumlah()));
             holder.jumlah.setTextColor(Color.GREEN);
-            holder.ket.setText(history.getKet());
+
         }else {
-            holder.tgl_hyst.setText(history.getTgl());
+
             holder.jumlah.setText("- Rp "+ NumberFormat.getInstance().format(history.getJumlah()));
             holder.jumlah.setTextColor(Color.RED);
-            holder.ket.setText(history.getKet());
-        }
 
+        }
+        holder.ket.setText(history.getKet());
     }
     public void setListContent(List<History> list_hyst){
         this.datalist = list_hyst;

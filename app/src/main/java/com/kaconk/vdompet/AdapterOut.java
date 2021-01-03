@@ -1,6 +1,7 @@
 package com.kaconk.vdompet;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AdapterOut extends RecyclerView.Adapter<AdapterOut.OutHolder>{
     private Context context;
     private List<OutTrans> datalist = new ArrayList<>();
     private final LayoutInflater inflater;
+    private SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
     OutHolder holder;
     View view;
 
@@ -36,7 +41,13 @@ public class AdapterOut extends RecyclerView.Adapter<AdapterOut.OutHolder>{
     @Override
     public void onBindViewHolder(@NonNull OutHolder holder, int position) {
             OutTrans outTrans = datalist.get(position);
-        holder.tgl_out.setText(outTrans.getTgl_out());
+        try{
+            Date date = dateFormat.parse(outTrans.getTgl_out());
+            holder.tgl_out.setText(dateFormat.format(date));
+        }catch (ParseException e){
+            Log.d("error : ",e.toString());
+        }
+
         holder.juml_out.setText("Rp "+ NumberFormat.getInstance().format(outTrans.getJumlah()));
         holder.ket_out.setText(outTrans.getKet_out());
     }

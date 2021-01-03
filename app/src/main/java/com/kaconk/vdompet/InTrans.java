@@ -2,6 +2,10 @@ package com.kaconk.vdompet;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class InTrans {
     @SerializedName("id_in")
     String id_in;
@@ -13,6 +17,7 @@ public class InTrans {
     String ket_in;
     @SerializedName("jumlah")
     double jumlah;
+    //private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");;
 
     public InTrans(){
 
@@ -31,8 +36,9 @@ public class InTrans {
     public void setId_dompet(String id_domp){
         this.id_dompet = id_domp;
     }
-    public void setTgl_in(String tgl){
-        this.tgl_in=tgl;
+    public void setTgl_in(String tgl) {
+
+        this.tgl_in= tgl;
     }
     public void setKet_in(String ket){
         this.ket_in = ket;
